@@ -26,7 +26,7 @@ class _TareasPageState extends State<TareasPage> {
   Future<void> _agregarTarea() async {
     final String titulo = _tituloController.text.trim();
     if (titulo.isEmpty) {
-      _pendiente('Escribe un título para la tarea');
+      _mostrarMensaje('Escribe un título para la tarea');
       return;
     }
 
@@ -35,23 +35,84 @@ class _TareasPageState extends State<TareasPage> {
       _tituloController.clear();
     } catch (e) {
       if (!mounted) return;
-      _pendiente('No se pudo guardar la tarea');
+      _mostrarMensaje('No se pudo guardar la tarea');
     }
   }
 
-  void _alternarCompletada(Tarea tarea, bool completada) {
-    _pendiente('Implementar actualización de tarea');
+  Future<void> _alternarCompletada(Tarea tarea, bool completada) async {
+    try {
+      await widget.baseDatos.cambiarEstado(tarea.id, completada);
+    } catch (e) {
+      if (!mounted) return;
+      _mostrarMensaje('No se pudo actualizar la tarea');
+    }
   }
 
-  void _editarTarea(Tarea tarea) {
-    _pendiente('Implementar edición de título');
+  Future<void> _editarTarea(Tarea tarea) async {
+    final String? nuevoTitulo = await _pedirNuevoTitulo(tarea.titulo);
+    // null significa que el usuario canceló.
+    if (nuevoTitulo == null) return;
+
+    final String titulo = nuevoTitulo.trim();
+    if (titulo.isEmpty) {
+      _mostrarMensaje('El título no puede quedar vacío');
+      return;
+    }
+
+    try {
+      await widget.baseDatos.editarTitulo(tarea.id, titulo);
+    } catch (e) {
+      if (!mounted) return;
+      _mostrarMensaje('No se pudo editar la tarea');
+    }
   }
 
-  void _eliminarTarea(Tarea tarea) {
-    _pendiente('Implementar eliminación de tarea');
+  Future<void> _eliminarTarea(Tarea tarea) async {
+    try {
+      await widget.baseDatos.eliminarTarea(tarea.id);
+      if (!mounted) return;
+      _mostrarMensaje('Tarea eliminada');
+    } catch (e) {
+      if (!mounted) return;
+      _mostrarMensaje('No se pudo eliminar la tarea');
+    }
   }
 
-  void _pendiente(String mensaje) {
+  // Muestra un cuadro con el título actual y regresa el texto nuevo.
+  Future<String?> _pedirNuevoTitulo(String tituloActual) async {
+    final TextEditingController controller = TextEditingController(
+      text: tituloActual,
+    );
+
+    final String? resultado = await showDialog<String>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Editar tarea'),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            decoration: const InputDecoration(labelText: 'Título'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, controller.text),
+              child: const Text('Guardar'),
+            ),
+          ],
+        );
+      },
+    );
+
+    controller.dispose();
+    return resultado;
+  }
+
+  void _mostrarMensaje(String mensaje) {
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text(mensaje)));
   }

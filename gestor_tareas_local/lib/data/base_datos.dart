@@ -33,4 +33,20 @@ class BaseDatos extends _$BaseDatos {
   Future<int> agregarTarea(String titulo) {
     return into(tareas).insert(TareasCompanion.insert(titulo: titulo));
   }
+
+  Future<int> editarTitulo(int id, String titulo) {
+    return (update(tareas)..where((t) => t.id.equals(id))).write(
+      TareasCompanion(titulo: Value(titulo)),
+    );
+  }
+
+  Future<int> cambiarEstado(int id, bool completada) {
+    return (update(tareas)..where((t) => t.id.equals(id))).write(
+      TareasCompanion(completada: Value(completada)),
+    );
+  }
+
+  Future<int> eliminarTarea(int id) {
+    return (delete(tareas)..where((t) => t.id.equals(id))).go();
+  }
 }
