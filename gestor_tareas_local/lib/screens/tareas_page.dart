@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import '../models/tarea.dart';
 
-// Pantalla base SIN persistencia ni operaciones CRUD implementadas.
-// Conserva las indicaciones TODO para orientar tu trabajo.
+import '../data/base_datos.dart';
+
 class TareasPage extends StatefulWidget {
-  const TareasPage({super.key});
+  final BaseDatos baseDatos;
+
+  const TareasPage({super.key, required this.baseDatos});
 
   @override
   State<TareasPage> createState() => _TareasPageState();
@@ -13,16 +14,29 @@ class TareasPage extends StatefulWidget {
 class _TareasPageState extends State<TareasPage> {
   final TextEditingController _tituloController = TextEditingController();
 
-  List<Tarea> _tareas = [];
+  // La consulta se crea una sola vez aquí y no dentro de build().
+  late final Stream<List<Tarea>> _tareas;
 
   @override
   void initState() {
     super.initState();
-
+    _tareas = widget.baseDatos.verTareas();
   }
 
-  void _agregarTarea() {
-    _pendiente('Implementar registro de tarea');
+  Future<void> _agregarTarea() async {
+    final String titulo = _tituloController.text.trim();
+    if (titulo.isEmpty) {
+      _pendiente('Escribe un título para la tarea');
+      return;
+    }
+
+    try {
+      await widget.baseDatos.agregarTarea(titulo);
+      _tituloController.clear();
+    } catch (e) {
+      if (!mounted) return;
+      _pendiente('No se pudo guardar la tarea');
+    }
   }
 
   void _alternarCompletada(Tarea tarea, bool completada) {
@@ -38,14 +52,15 @@ class _TareasPageState extends State<TareasPage> {
   }
 
   void _pendiente(String mensaje) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(mensaje)),
-    );
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(mensaje)));
   }
 
   @override
   void dispose() {
     _tituloController.dispose();
+    // Cierra la base de datos al salir de la pantalla para liberar recursos.
+    widget.baseDatos.close();
     super.dispose();
   }
 
@@ -75,43 +90,62 @@ class _TareasPageState extends State<TareasPage> {
             const Text('Mis tareas', style: TextStyle(fontSize: 18)),
             const SizedBox(height: 8),
             Expanded(
-              child: _tareas.isEmpty
-                  ? const Center(child: Text('Todavía no hay tareas guardadas'))
-                  : ListView.builder(
-                      itemCount: _tareas.length,
-                      itemBuilder: (context, index) {
-                        final tarea = _tareas[index];
-                        return Card(
-                          child: ListTile(
-                            leading: Checkbox(
-                              value: tarea.completada,
-                              onChanged: (valor) {
-                                if (valor != null) {
-                                  _alternarCompletada(tarea, valor);
-                                }
-                              },
-                            ),
-                            title: Text(tarea.titulo),
-                            subtitle: Text('ID: ${tarea.id}'),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  tooltip: 'Editar',
-                                  icon: const Icon(Icons.edit),
-                                  onPressed: () => _editarTarea(tarea),
-                                ),
-                                IconButton(
-                                  tooltip: 'Eliminar',
-                                  icon: const Icon(Icons.delete_outline),
-                                  onPressed: () => _eliminarTarea(tarea),
-                                ),
-                              ],
-                            ),
+              child: StreamBuilder<List<Tarea>>(
+                stream: _tareas,
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return const Center(
+                      child: Text('No se pudieron cargar las tareas'),
+                    );
+                  }
+                  if (!snapshot.hasData) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  final List<Tarea> tareas = snapshot.data!;
+                  if (tareas.isEmpty) {
+                    return const Center(
+                      child: Text('Todavía no hay tareas guardadas'),
+                    );
+                  }
+
+                  return ListView.builder(
+                    itemCount: tareas.length,
+                    itemBuilder: (context, index) {
+                      final Tarea tarea = tareas[index];
+                      return Card(
+                        child: ListTile(
+                          leading: Checkbox(
+                            value: tarea.completada,
+                            onChanged: (valor) {
+                              if (valor != null) {
+                                _alternarCompletada(tarea, valor);
+                              }
+                            },
                           ),
-                        );
-                      },
-                    ),
+                          title: Text(tarea.titulo),
+                          subtitle: Text('ID: ${tarea.id}'),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                tooltip: 'Editar',
+                                icon: const Icon(Icons.edit),
+                                onPressed: () => _editarTarea(tarea),
+                              ),
+                              IconButton(
+                                tooltip: 'Eliminar',
+                                icon: const Icon(Icons.delete_outline),
+                                onPressed: () => _eliminarTarea(tarea),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
             ),
           ],
         ),
