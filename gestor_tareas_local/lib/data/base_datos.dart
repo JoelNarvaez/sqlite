@@ -22,7 +22,15 @@ class BaseDatos extends _$BaseDatos {
   int get schemaVersion => 1;
 
   static QueryExecutor _abrirConexion() {
-    return driftDatabase(name: 'tareas_db');
+    return driftDatabase(
+      name: 'tareas_db',
+      // En el navegador SQLite corre como WebAssembly. Los dos archivos
+      // están en la carpeta web/ y son del release drift-2.35.4.
+      web: DriftWebOptions(
+        sqlite3Wasm: Uri.parse('sqlite3.wasm'),
+        driftWorker: Uri.parse('drift_worker.js'),
+      ),
+    );
   }
 
   // Regresa todas las tareas y vuelve a avisar cada vez que la tabla cambia.
