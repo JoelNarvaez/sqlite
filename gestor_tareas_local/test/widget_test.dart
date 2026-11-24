@@ -18,4 +18,22 @@ void main() {
     await tester.pumpWidget(const SizedBox());
     await tester.pump(Duration.zero);
   });
+
+  testWidgets('No se agrega una tarea con título vacío', (tester) async {
+    final BaseDatos baseDatos = BaseDatos(NativeDatabase.memory());
+
+    await tester.pumpWidget(GestorTareasApp(baseDatos: baseDatos));
+    await tester.pumpAndSettle();
+
+    // Un título solo con espacios también cuenta como vacío.
+    await tester.enterText(find.byType(TextField), '   ');
+    await tester.tap(find.text('Agregar tarea'));
+    await tester.pump();
+
+    expect(find.text('Escribe un título para la tarea'), findsOneWidget);
+    expect(find.text('Todavía no hay tareas guardadas'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump(Duration.zero);
+  });
 }
