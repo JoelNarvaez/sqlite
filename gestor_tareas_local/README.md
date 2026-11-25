@@ -59,14 +59,14 @@ Se corren con `flutter test`. Todas usan una base en memoria, así que no tocan 
 
 ## Pruebas manuales
 
-| Prueba | Qué hice | Windows | Chrome |
-|--------|----------|---------|--------|
-| P1 | Agregar 3 tareas, cerrar la app y abrirla | Sí. Las 3 tareas siguieron ahí | Sí. Las 3 tareas siguieron ahí |
-| P2 | Marcar una como completada y reiniciar | Sí. Siguió marcada | Sí. Siguió marcada |
-| P3 | Cambiar el título de una tarea y reiniciar | Sí. Se quedó el título nuevo | Sí. Se quedó el título nuevo |
-| P4 | Eliminar una tarea y reiniciar | Sí. No volvió a aparecer | Sí. No volvió a aparecer |
-| P5 | Intentar agregar un título vacío | Sí. Salió el aviso y no se agregó | Sí. Salió el aviso y no se agregó |
-| P6 | Recargar y cerrar/abrir la pestaña | Si, los datos persisten | Sí. Los datos se conservaron |
+| Prueba | Qué hice | Windows | Chrome | Android |
+|--------|----------|---------|--------|---------|
+| P1 | Agregar 3 tareas, cerrar la app y abrirla | Sí. Las 3 tareas siguieron ahí | Sí. Las 3 tareas siguieron ahí | Sí. Las 3 tareas siguieron ahí |
+| P2 | Marcar una como completada y reiniciar | Sí. Siguió marcada | Sí. Siguió marcada | Sí. Siguió marcada |
+| P3 | Cambiar el título de una tarea y reiniciar | Sí. Se quedó el título nuevo | Sí. Se quedó el título nuevo | Sí. Se quedó el título nuevo |
+| P4 | Eliminar una tarea y reiniciar | Sí. No volvió a aparecer | Sí. No volvió a aparecer | Sí. No volvió a aparecer |
+| P5 | Intentar agregar un título vacío | Sí. Salió el aviso y no se agregó | Sí. Salió el aviso y no se agregó | Sí. Salió el aviso y no se agregó |
+| P6 | Recargar y cerrar/abrir la pestaña | Si, los datos persisten | Sí. Los datos se conservaron | — |
 
 ## Plataformas
 

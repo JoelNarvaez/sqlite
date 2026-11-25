@@ -20,7 +20,8 @@ class GestorTareasApp extends StatelessWidget {
       title: 'Gestor de tareas',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF00796B)),
+        scaffoldBackgroundColor: const Color(0xFFF1F7F6),
         useMaterial3: true,
       ),
       home: TareasPage(baseDatos: baseDatos),
